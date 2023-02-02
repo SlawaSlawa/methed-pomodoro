@@ -1,25 +1,17 @@
 import { alarm } from "./alarm.js"
+import { changeActiveBtn } from "./control.js"
 import { state } from "./state.js"
+import { addZero } from "./util.js"
 
 const minutesElem = document.querySelector('.time__minutes')
 const secondsElem = document.querySelector('.time__seconds')
 
-const showTime = (seconds) => {
+export const showTime = (seconds) => {
     const min = Math.floor(seconds / 60)
     const sec = Math.floor(seconds % 60)
 
-    if (min < 10) {
-        minutesElem.textContent = '0' + min
-    } else {
-        minutesElem.textContent = min
-    }
-    if (sec < 10) {
-        secondsElem.textContent = '0' + sec
-    } else {
-        secondsElem.textContent = sec
-    }
-
-    
+    minutesElem.textContent = addZero(min)
+    secondsElem.textContent = addZero(sec)
 }
 
 export const startTimer = () => {
@@ -32,6 +24,22 @@ export const startTimer = () => {
     }
 
     if (state.timeLeft <= 0) {
+        if (state.status === 'work') {
+            state.activeTodo.pomodoro +=1
+
+            if (state.activeTodo.pomodoro % state.count) {
+                state.status = 'break'
+            } else {
+                state.status = 'relax'
+            }
+
+        } else {
+            state.status = 'work'
+        }
+
         alarm()
+        state.timeLeft = state[state.status] * 60
+        changeActiveBtn(state.status)
+        startTimer()
     }
 }
